@@ -1,12 +1,15 @@
 package ee.taltech.a15
 
 
+import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.ServiceConnection
+import android.os.Process
+
 
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
@@ -18,11 +21,14 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import java.util.Random
+import java.util.Stack
 
 class MainActivity : AppCompatActivity() {
     private val buttonList = mutableListOf<Button>()
     private val solvedOrder = (1..15).toList() + 0
     private var timerService: TimerService? = null
+    private var turnCount = 0
+    private val moveStack = Stack<Pair<Button, Int>>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -44,6 +50,7 @@ class MainActivity : AppCompatActivity() {
         scrambleButton.setOnClickListener {
             scrambleBoard()
             buttonStartTimerService()
+            turnCount = 0
         }
         val PauseButton = findViewById<Button>(R.id.buttonPause)
         PauseButton.setOnClickListener {
@@ -51,15 +58,29 @@ class MainActivity : AppCompatActivity() {
         }
         val EndButton = findViewById<Button>(R.id.buttonEnd)
         EndButton.setOnClickListener {
-            stopAndResetTimerService()
-            restartApp(this)
+            buttonStopTimerService()
+            closeApplication(this)
         }
         val ResumeButton = findViewById<Button>(R.id.ButtonResume)
         ResumeButton.setOnClickListener {
             buttonResumeService()
         }
+        val buttonUndo = findViewById<Button>(R.id.ButtonUndo)
+        buttonUndo.setOnClickListener {
+            if(turnCount != 0) {
+                undoLastMove()
+            }
+        }
 
 
+        // Retrieve the last known timer value from shared preferences
+        val sharedPreferences = getSharedPreferences("TimerPrefs", Context.MODE_PRIVATE)
+        val timerValue = sharedPreferences.getInt("timer_value", 0)
+
+        // Update the timer value in your UI
+        val timerTextView = findViewById<TextView>(R.id.timerTextView)
+        val formattedTime = String.format("%02d:%02d", timerValue / 60, timerValue % 60)
+        timerTextView.text = formattedTime
         val timerReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 val timerValue = intent?.getIntExtra("timer_value", 0)
@@ -90,6 +111,11 @@ class MainActivity : AppCompatActivity() {
             (difference == -1 && clickedButtonId / 4 == (clickedButtonId + 1) / 4) ||
             (difference == 4 && clickedButtonId % 4 == (clickedButtonId - 4) % 4) ||
             (difference == -4 && clickedButtonId % 4 == (clickedButtonId + 4) % 4)) {
+            turnCount++
+
+            val move = Pair(button, emptyButtonIndex)
+
+            moveStack.push(Pair(button, emptyButtonIndex))
             val clickedButtonText = button.text
             button.visibility = View.INVISIBLE
             button.text = ""
@@ -101,6 +127,11 @@ class MainActivity : AppCompatActivity() {
                 println("Puzzle is solved!")
                 restartApp(this)
             }
+
+
+            val turnsMadeTextView = findViewById<TextView>(R.id.TextViewTurnsMade)
+            turnsMadeTextView.text = "Turns made: $turnCount"
+
 
 
         }
@@ -144,6 +175,8 @@ class MainActivity : AppCompatActivity() {
             button.isClickable = true
             button.visibility = View.VISIBLE
         }
+        checkButtonColors()
+
     }
     private fun buttonStopTimerService() {
         val stopServiceIntent = Intent(this, TimerService::class.java)
@@ -166,10 +199,6 @@ class MainActivity : AppCompatActivity() {
         timerService?.resumeTimer()
 
     }
-    private fun stopAndResetTimerService() {
-        connectService()
-        timerService?.stopAndResetTimer()
-    }
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val binder = service as TimerService.LocalBinder
@@ -188,10 +217,52 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun restartApp(context: Context) {
+        // Stop the timer before restarting the app
+        timerService?.pauseTimer()
 
+        // Restart the app
         val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
         intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         context.startActivity(intent)
+    }
+    fun closeApplication(activity: Activity) {
+        // Finish all open activities
+        activity.finishAffinity()
+
+        // Exit the application process
+        Process.killProcess(Process.myPid())
+    }
+
+    private fun undoLastMove() {
+        if (moveStack.isNotEmpty()) {
+            val (button, originalIndex) = moveStack.pop()
+            val emptyButtonIndex = buttonList.indexOfFirst { it.text.toString().isBlank() }
+
+            // Swap the button text and visibility back to the original state
+            val buttonText = button.text
+            button.text = buttonList[originalIndex].text
+            buttonList[originalIndex].text = buttonText
+
+            button.visibility = View.VISIBLE
+            buttonList[originalIndex].visibility = View.INVISIBLE
+            checkButtonText(button)
+
+
+            turnCount--
+            val turnsMadeTextView = findViewById<TextView>(R.id.TextViewTurnsMade)
+            turnsMadeTextView.text = "Turns made: $turnCount"
+        }
+    }
+    private fun checkButtonColors() {
+        for (button in buttonList) {
+            val buttonId = buttonList.indexOf(button) + 1
+            val buttonText = button.text.toString()
+            if (buttonText.isNotEmpty() && buttonText.toInt() == buttonId) {
+                button.setBackgroundColor(Color.GREEN)
+            } else {
+                button.setBackgroundColor(Color.WHITE)
+            }
+        }
     }
 
 

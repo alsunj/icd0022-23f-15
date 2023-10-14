@@ -1,6 +1,7 @@
 package ee.taltech.a15
 
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.os.Binder
 import android.os.Handler
@@ -55,18 +56,20 @@ class TimerService : Service() {
 
     fun pauseTimer() {
         isTimerRunning = false
-        Log.d("TimerService", "Timer paused")
+
     }
 
     fun resumeTimer() {
         isTimerRunning = true
         startTimeMillis = System.currentTimeMillis() - (elapsedTimeSeconds * 1000)
-        Log.d("TimerService", "Timer resumed")
+
     }
     private fun sendTimerUpdate(elapsedTimeSeconds: Int) {
         val intent = Intent("timer_update")
         intent.putExtra("timer_value", elapsedTimeSeconds)
         sendBroadcast(intent)
+        val sharedPreferences = getSharedPreferences("TimerPrefs", Context.MODE_PRIVATE)
+        sharedPreferences.edit().putInt("timer_value", elapsedTimeSeconds).apply()
     }
 
     override fun onDestroy() {
@@ -79,5 +82,6 @@ class TimerService : Service() {
         startTimeMillis = 0
 
     }
+
 
 }

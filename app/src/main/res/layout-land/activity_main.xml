@@ -6,15 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <include
-        layout="@layout/top_bar"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/GuidelineHelpTopMiddle"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/GuidelineHelpTopMiddle"
         android:layout_width="wrap_content"
@@ -23,13 +14,26 @@
         app:layout_constraintGuide_percent="0.15" />
 
     <include
+        android:id="@+id/firstIncludedLayout"
         layout="@layout/game_control"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/include"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/GuidelineHelpTopMiddle" />
+        app:layout_constraintTop_toTopOf="parent"
+
+        />
+
+    <include
+        android:id="@+id/secondIncludedLayout"
+        layout="@layout/top_bar"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/GuidelineHelpTopMiddle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <include
         android:id="@+id/include"
