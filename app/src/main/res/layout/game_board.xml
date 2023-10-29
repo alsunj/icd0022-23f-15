@@ -7,14 +7,13 @@
     android:background="#7c7a7b">
 
     <Button
+        style="?attr/buttonStyle"
         android:id="@+id/button1"
-        style="@style/TextButton"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="10dp"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:backgroundTint="@color/button_white"
         android:scaleX="1.1"
         android:scaleY="1.1"
         android:text="1"
@@ -27,17 +26,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="spread_inside"
-        tools:ignore="HardcodedText" />
+        tools:ignore="HardcodedText"
+
+
+
+        />
 
     <Button
+        style="?attr/buttonStyle"
         android:id="@+id/button2"
-        style="@style/TextButton"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="10dp"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:backgroundTint="@color/button_white"
         android:scaleX="1.1"
         android:scaleY="1.1"
         android:text="2"
@@ -49,17 +51,18 @@
         app:layout_constraintStart_toEndOf="@+id/button1"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="spread_inside"
-        tools:ignore="HardcodedText" />
+        tools:ignore="HardcodedText"
+
+        />
 
     <Button
+        style="?attr/buttonStyle"
         android:id="@+id/button3"
-        style="@style/TextButton"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="10dp"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:backgroundTint="@color/button_white"
         android:scaleX="1.1"
         android:scaleY="1.1"
         android:text="3"
@@ -71,17 +74,18 @@
         app:layout_constraintStart_toEndOf="@+id/button2"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="spread_inside"
+
         tools:ignore="HardcodedText" />
 
     <Button
         android:id="@+id/button4"
-        style="@style/TextButton"
+        style="?attr/buttonStyle"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="10dp"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:backgroundTint="@color/button_white"
+
         android:scaleX="1.1"
         android:scaleY="1.1"
         android:text="4"
@@ -93,17 +97,18 @@
         app:layout_constraintStart_toEndOf="@+id/button3"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="spread_inside"
-        tools:ignore="HardcodedText" />
+        tools:ignore="HardcodedText"
+      />
 
     <Button
         android:id="@+id/button5"
-        style="@style/TextButton"
+        style="?attr/buttonStyle"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="10dp"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:backgroundTint="@color/button_white"
+
         android:scaleX="1.1"
         android:scaleY="1.1"
         android:text="5"
@@ -119,13 +124,13 @@
 
     <Button
         android:id="@+id/button6"
-        style="@style/TextButton"
+        style="?attr/buttonStyle"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="10dp"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:backgroundTint="@color/button_white"
+
         android:scaleX="1.1"
         android:scaleY="1.1"
         android:text="6"
@@ -140,13 +145,13 @@
 
     <Button
         android:id="@+id/button7"
-        style="@style/TextButton"
+        style="?attr/buttonStyle"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="10dp"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:backgroundTint="@color/button_white"
+
         android:scaleX="1.1"
         android:scaleY="1.1"
         android:text="7"
@@ -161,13 +166,13 @@
 
     <Button
         android:id="@+id/button8"
-        style="@style/TextButton"
+        style="?attr/buttonStyle"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="10dp"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:backgroundTint="@color/button_white"
+
         android:scaleX="1.1"
         android:scaleY="1.1"
         android:text="8"
@@ -182,13 +187,13 @@
 
     <Button
         android:id="@+id/button9"
-        style="@style/TextButton"
+        style="?attr/buttonStyle"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="10dp"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:backgroundTint="@color/button_white"
+
         android:scaleX="1.1"
         android:scaleY="1.1"
         android:text="9"
@@ -204,13 +209,13 @@
 
     <Button
         android:id="@+id/button10"
-        style="@style/TextButton"
+        style="?attr/buttonStyle"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="10dp"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:backgroundTint="@color/button_white"
+
         android:scaleX="1.1"
         android:scaleY="1.1"
         android:text="10"
@@ -225,13 +230,13 @@
 
     <Button
         android:id="@+id/button11"
-        style="@style/TextButton"
+        style="?attr/buttonStyle"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="10dp"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:backgroundTint="@color/button_white"
+
         android:scaleX="1.1"
         android:scaleY="1.1"
         android:text="11"
@@ -246,13 +251,13 @@
 
     <Button
         android:id="@+id/button12"
-        style="@style/TextButton"
+        style="?attr/buttonStyle"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="10dp"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:backgroundTint="@color/button_white"
+
         android:scaleX="1.1"
         android:scaleY="1.1"
         android:text="12"
@@ -267,13 +272,13 @@
 
     <Button
         android:id="@+id/button13"
-        style="@style/TextButton"
+        style="?attr/buttonStyle"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="10dp"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:backgroundTint="@color/button_white"
+
         android:scaleX="1.1"
         android:scaleY="1.1"
         android:text="13"
@@ -289,13 +294,13 @@
 
     <Button
         android:id="@+id/button14"
-        style="@style/TextButton"
+        style="?attr/buttonStyle"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="10dp"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:backgroundTint="@color/button_white"
+
         android:scaleX="1.1"
         android:scaleY="1.1"
         android:text="14"
@@ -310,13 +315,13 @@
 
     <Button
         android:id="@+id/button15"
-        style="@style/TextButton"
+        style="?attr/buttonStyle"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="10dp"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:backgroundTint="@color/button_white"
+
         android:scaleX="1.1"
         android:scaleY="1.1"
         android:text="15"
@@ -331,11 +336,11 @@
 
     <Button
         android:id="@+id/button16"
-        style="@style/TextButton"
+        style="?attr/buttonStyle"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="10dp"
-        android:backgroundTint="@color/button_white"
+
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
         android:scaleX="1.1"

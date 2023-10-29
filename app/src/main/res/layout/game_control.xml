@@ -7,6 +7,7 @@
     android:background="#7c7a7b">
 
     <TextView
+        style="?attr/buttonStyle"
         android:id="@+id/timerTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -19,16 +20,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.75" />
+        app:layout_constraintGuide_begin="300dp" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.25" />
+        app:layout_constraintGuide_percent="0.21" />
 
     <TextView
+        style="?attr/buttonStyle"
         android:id="@+id/TextViewTurnsMade"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -37,10 +39,11 @@
         app:layout_constraintTop_toBottomOf="@+id/timerTextView" />
 
     <Button
+        style="?attr/buttonStyle"
         android:id="@+id/ButtonUndo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Button"
+        android:text="Undo"
         app:layout_constraintStart_toStartOf="@+id/guideline4"
         app:layout_constraintTop_toBottomOf="@+id/TextViewTurnsMade" />
 

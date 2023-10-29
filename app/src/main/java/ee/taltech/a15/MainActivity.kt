@@ -1,6 +1,9 @@
+@file:Suppress("SameParameterValue")
+
 package ee.taltech.a15
 
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.ComponentName
@@ -8,197 +11,467 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.ServiceConnection
-import android.os.Process
-
-
-import android.graphics.Color
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.IBinder
-
-
+import android.os.Process
+import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.ImageView
+import android.widget.PopupMenu
 import android.widget.TextView
-import java.util.Random
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import java.util.Stack
 
+
 class MainActivity : AppCompatActivity() {
-    private val buttonList = mutableListOf<Button>()
-    private val solvedOrder = (1..15).toList() + 0
+    private lateinit var gameBoardLayout: ConstraintLayout
+    private lateinit var buttonOnClickListener: View.OnClickListener
+    private lateinit var scrambleButton: Button
+    private lateinit var endButton: ImageView
+    private lateinit var testButton: Button
+    private lateinit var exitButton: Button
+    private lateinit var undoButton: Button
+    private lateinit var timerTextView: TextView
+    private lateinit var turnsMadeTextView: TextView
+
+
+    private var gameActiveState = "gameActive"
+    private var gameActive = false
+    private var firstStart = true
+    private lateinit var board: gameBoard
+    private lateinit var buttonMap: MutableMap<Int, String>
+    private var moveStack = Stack<Pair<Int, Int>>()
+    private var buttonWithNoTextId: Int? = null
     private var timerService: TimerService? = null
     private var turnCount = 0
-    private val moveStack = Stack<Pair<Button, Int>>()
+    private var homeButtonClickCount = 0
+    private var themeId = 0
+    private var buttonIds = intArrayOf(
+        R.id.button1,
+        R.id.button2,
+        R.id.button3,
+        R.id.button4,
+        R.id.button5,
+        R.id.button6,
+        R.id.button7,
+        R.id.button8,
+        R.id.button9,
+        R.id.button10,
+        R.id.button11,
+        R.id.button12,
+        R.id.button13,
+        R.id.button14,
+        R.id.button15,
+        R.id.button16
+    )
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
+        themeId = theme()
+        setTheme(themeId)
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        for (i in 1..16) {
-            val buttonId = resources.getIdentifier("button$i", "id", packageName)
-            val button = findViewById<Button>(buttonId)
-            buttonList.add(button)
-            button.isClickable = false
-            button.visibility = View.INVISIBLE
-            button.setOnClickListener {
-                handleButtonClick(button)
+        initView()
+        setBoard(savedInstanceState)
+        checkAllButtonColors()
+        timer()
+        findEmpty()
+        buttons()
+    }
 
-            }
-        }
-
-        val scrambleButton = findViewById<Button>(R.id.scrambleButton)
-        scrambleButton.setOnClickListener {
-            scrambleBoard()
-            buttonStartTimerService()
-            turnCount = 0
-        }
-        val PauseButton = findViewById<Button>(R.id.buttonPause)
-        PauseButton.setOnClickListener {
-            buttonPauseService()
-        }
-        val EndButton = findViewById<Button>(R.id.buttonEnd)
-        EndButton.setOnClickListener {
-            buttonStopTimerService()
-            closeApplication(this)
-        }
-        val ResumeButton = findViewById<Button>(R.id.ButtonResume)
-        ResumeButton.setOnClickListener {
-            buttonResumeService()
-        }
-        val buttonUndo = findViewById<Button>(R.id.ButtonUndo)
-        buttonUndo.setOnClickListener {
-            if(turnCount != 0) {
-                undoLastMove()
-            }
-        }
+    private fun buttons() {
+        startButton()
+        menuButton()
+        undoButton()
+    }
 
 
-        // Retrieve the last known timer value from shared preferences
-        val sharedPreferences = getSharedPreferences("TimerPrefs", Context.MODE_PRIVATE)
-        val timerValue = sharedPreferences.getInt("timer_value", 0)
+    private fun theme(): Int {
+        val sharedPrefs = getSharedPreferences("MyAppPreferences", Context.MODE_PRIVATE)
+        val isDarkTheme = sharedPrefs.getBoolean("isDarkTheme", false)
+        return if (isDarkTheme) R.style.DarkTheme else R.style.LightTheme
+    }
 
-        // Update the timer value in your UI
-        val timerTextView = findViewById<TextView>(R.id.timerTextView)
-        val formattedTime = String.format("%02d:%02d", timerValue / 60, timerValue % 60)
-        timerTextView.text = formattedTime
-        val timerReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                val timerValue = intent?.getIntExtra("timer_value", 0)
-                val timerTextView = findViewById<TextView>(R.id.timerTextView)
+    private fun switchTheme(darkTheme: Boolean) {
+        val mode =
+            if (darkTheme) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+        AppCompatDelegate.setDefaultNightMode(mode)
 
-                // Display the timer value in the TextView
-                val formattedTime = if (timerValue != null) {
-                    String.format("%02d:%02d", timerValue / 60, timerValue % 60)
-                } else {
-                    "00:00" // Default value if timerValue is null
+
+        val sharedPrefs = getSharedPreferences("MyAppPreferences", Context.MODE_PRIVATE)
+        sharedPrefs.edit().putBoolean("isDarkTheme", darkTheme).apply()
+
+        recreate()
+    }
+
+    private fun menuButton() {
+        endButton.setOnClickListener {
+
+
+            val popupMenu = PopupMenu(this@MainActivity, endButton)
+            popupMenu.menuInflater.inflate(R.menu.main_menu, popupMenu.menu)
+
+            popupMenu.setOnMenuItemClickListener { menuItem ->
+                buttonPauseService()
+
+                when (menuItem.itemId) {
+                    R.id.nav_home -> {
+                        homeButtonClickCount++
+                        val message = "Your luck is increased by $homeButtonClickCount times"
+                        Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
+                    }
+
+                    R.id.nav_exit -> {
+                        exitButton()
+                    }
+
+                    R.id.nav_Light -> {
+                        switchTheme(false)
+                    }
+
+                    R.id.nav_Dark -> {
+                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                        switchTheme(true)
+                    }
                 }
-                timerTextView.text = formattedTime
-
-            }
-        }
-
-        val timerIntentFilter = IntentFilter("timer_update")
-        registerReceiver(timerReceiver, timerIntentFilter)
-
-    }
-
-
-    private fun handleButtonClick(button: Button) {
-        val clickedButtonId = buttonList.indexOf(button)
-        val emptyButtonIndex = buttonList.indexOfFirst { it.text.toString().isBlank() }
-        val difference = clickedButtonId - emptyButtonIndex
-        if ((difference == 1 && clickedButtonId / 4 == (clickedButtonId - 1) / 4) ||
-            (difference == -1 && clickedButtonId / 4 == (clickedButtonId + 1) / 4) ||
-            (difference == 4 && clickedButtonId % 4 == (clickedButtonId - 4) % 4) ||
-            (difference == -4 && clickedButtonId % 4 == (clickedButtonId + 4) % 4)) {
-            turnCount++
-
-            val move = Pair(button, emptyButtonIndex)
-
-            moveStack.push(Pair(button, emptyButtonIndex))
-            val clickedButtonText = button.text
-            button.visibility = View.INVISIBLE
-            button.text = ""
-            buttonList[emptyButtonIndex].text = clickedButtonText
-            buttonList[emptyButtonIndex].visibility = View.VISIBLE
-            checkButtonText(button)
-            if (checkIfPuzzleIsSolved()) {
-                buttonStopTimerService()
-                println("Puzzle is solved!")
-                restartApp(this)
+                true
             }
 
-
-            val turnsMadeTextView = findViewById<TextView>(R.id.TextViewTurnsMade)
-            turnsMadeTextView.text = "Turns made: $turnCount"
-
-
-
-        }
-    }
-
-    private fun checkButtonText(button: Button)
-    {
-        for (i in 0 until buttonList.size) {
-            val button = buttonList[i]
-            val buttonId = i + 1
-            val buttonText = button.text.toString()
-            if (buttonText.isNotEmpty() && buttonText.toInt() == buttonId) {
-                button.setBackgroundColor(Color.GREEN)
-            } else {
-                button.setBackgroundColor(Color.WHITE)
+            popupMenu.setOnDismissListener {
+                buttonResumeService()
             }
+            popupMenu.show()
         }
     }
 
-    private fun checkIfPuzzleIsSolved(): Boolean {
-        return buttonList.withIndex().all { (i, button) ->
-            val buttonText = button.text.toString()
-            buttonText == solvedOrder[i].toString() || buttonText.isBlank()
+    private fun exitButton() {
+        exitButton.setOnClickListener {
+            closeApplication(this)
+            buttonStopTimerService()
+
         }
     }
-    private fun scrambleBoard() {
-        val random = Random()
-        val indices = (0 until 16).toMutableList()
-        indices.shuffle(random)
 
-        for (i in 0 until 15) {
-            val currentIndex = indices[i]
-            val randomIndex = indices[i + 1]
-
-            val currentText = buttonList[currentIndex].text
-            buttonList[currentIndex].text = buttonList[randomIndex].text
-            buttonList[randomIndex].text = currentText
-
-        }
-        for (button in buttonList) {
-            button.isClickable = true
-            button.visibility = View.VISIBLE
-        }
-        checkButtonColors()
-
-    }
     private fun buttonStopTimerService() {
         val stopServiceIntent = Intent(this, TimerService::class.java)
         stopService(stopServiceIntent)
     }
-    private fun buttonStartTimerService() {
-        val startServiceIntent = Intent(this, TimerService::class.java)
-        startService(startServiceIntent)
-        connectService()
-        timerService?.resumeTimer()
+
+
+    private fun startButton() {
+        scrambleButton.setOnClickListener {
+
+            if (firstStart)
+                buildGame()
+            else resetGame()
+
+        }
+
     }
-    private fun buttonPauseService() {
-        connectService()
-        timerService?.pauseTimer()
+
+    private fun undoButton() {
+        undoButton.setOnClickListener {
+            undoMove()
+        }
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        gameActive = savedInstanceState.getBoolean(gameActiveState)
+        if (gameActive) {
+            activateBoard(true)
+            val moveStackString = savedInstanceState.getString("moveStack")
+            if (!moveStackString.isNullOrBlank()) {
+                val pairs = moveStackString.split(",")
+                if (pairs.size % 2 == 0) {
+                    moveStack.clear()
+                    for (i in pairs.indices step 2) {
+                        try {
+                            val first = pairs[i].toInt()
+                            val second = pairs[i + 1].toInt()
+                            moveStack.push(Pair(first, second))
+                        } catch (_: NumberFormatException) {
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+
+    private fun checkButtonText(button: Button) {
+        val buttonIdString = resources.getResourceEntryName(button.id)
+        val buttonText = button.text.toString()
+        val buttonId = buttonIdString.removePrefix("button").toInt()
+        val isDarkTheme =
+            AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES
+
+        if (buttonText.isNotEmpty() && buttonText == buttonId.toString()) {
+            val colorResId =
+                if (isDarkTheme) R.color.DarkModeButtonSolved else R.color.lightModeButtonSolved
+            val color = ContextCompat.getColor(this, colorResId)
+            button.setBackgroundColor(color)
+        } else {
+            val defaultColorResId =
+                if (isDarkTheme) R.color.DarkModeButton else R.color.lightModeButton
+            val defaultColor = ContextCompat.getColor(this, defaultColorResId)
+            button.setBackgroundColor(defaultColor)
+        }
+    }
+
+    private fun checkAllButtonColors() {
+
+        val isDarkTheme =
+            AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES
+
+        for (buttonId in buttonIds) {
+            val button = findViewById<Button>(buttonId)
+            val buttonIdString = resources.getResourceEntryName(buttonId)
+            val buttonText = button.text.toString()
+            val buttonIds = buttonIdString.removePrefix("button").toInt()
+
+            if (buttonText.isNotEmpty() && buttonText == buttonIds.toString()) {
+
+                val colorResId =
+                    if (isDarkTheme) R.color.DarkModeButtonSolved else R.color.lightModeButtonSolved
+                val color = ContextCompat.getColor(this, colorResId)
+                button.setBackgroundColor(color)
+            } else {
+
+                val defaultColorResId =
+                    if (isDarkTheme) R.color.DarkModeButton else R.color.lightModeButton
+                val defaultColor = ContextCompat.getColor(this, defaultColorResId)
+                button.setBackgroundColor(defaultColor)
+            }
+        }
+    }
+
+
+    private fun activateBoard(activate: Boolean) {
+        if (activate) {
+            buttonOnClickListener = View.OnClickListener { view ->
+                val idString = resources.getResourceEntryName(view.id)
+                handleButtonClick(idString)
+            }
+        }
+
+        for (i in 0 until gameBoardLayout.childCount) {
+            val button = gameBoardLayout.getChildAt(i)
+            if (activate) button.setOnClickListener(buttonOnClickListener)
+            else button.setOnClickListener(null)
+        }
+    }
+
+    private fun checkButtonOrder() {
+        var isCorrectOrder = true
+        var isLastButtonEmpty = false
+
+        for (i in 0 until buttonIds.size - 1) {
+            val buttonId = buttonIds[i]
+            val expectedText = (i + 1).toString()
+            val button = findViewById<Button>(buttonId)
+            val buttonText = button.text.toString()
+
+            if (buttonText != expectedText) {
+                isCorrectOrder = false
+            }
+        }
+
+        val lastButtonId = buttonIds.last()
+        val lastButton = findViewById<Button>(lastButtonId)
+        val lastButtonText = lastButton.text.toString()
+
+        if (lastButtonText.isEmpty()) {
+            isLastButtonEmpty = true
+        }
+
+        if (isCorrectOrder && isLastButtonEmpty) {
+            Toast.makeText(this, "Buttons are in the correct order!", Toast.LENGTH_SHORT).show()
+            buttonStopTimerService()
+            gameActive = false
+        }
+    }
+
+    private fun drawBoard(newGame: Boolean = true) {
+        val puzzle = board.createPuzzle()
+
+        for ((i, buttonId) in buttonIds.withIndex()) {
+            val buttonNumber = puzzle[i]
+
+            val button = findViewById<Button>(buttonId)
+
+
+            if (buttonNumber == 16) {
+
+                if (buttonMap.size == 16 && !newGame) {
+                    button.text = buttonMap[buttonId]
+                } else {
+                    button.text = ""
+                    buttonMap[buttonId] = button.text as String
+                }
+
+                buttonMap[buttonId] = button.text as String
+            } else {
+
+                if (buttonMap.size == 16 && !newGame) {
+                    button.text = buttonMap[buttonId]
+                } else {
+                    button.text = buttonNumber.toString()
+                    buttonMap[buttonId] = button.text as String
+                }
+            }
+        }
+    }
+
+    private fun closeApplication(activity: Activity) {
+
+        activity.finishAffinity()
+        Process.killProcess(Process.myPid())
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        if (::buttonMap.isInitialized) {
+            val keys = (buttonMap.keys).toIntArray()
+            val values = buttonMap.values.toTypedArray()
+
+            outState.putBoolean(gameActiveState, !firstStart)
+            outState.putIntArray("buttonIds", keys)
+            outState.putStringArray("buttonValues", values)
+
+        }
+        val moveStackString = moveStack.joinToString(",") { "${it.first},${it.second}" }
+        outState.putString("moveStack", moveStackString)
+    }
+
+    private fun buildGame() {
+        activateBoard(true)
+        findEmpty()
+        buttonStartTimerService()
+        firstStart = false
+    }
+
+    private fun resetGame() {
+
+        drawBoard()
+        buildGame()
+    }
+
+    private fun findEmpty() {
+        for (buttonId in buttonIds) {
+            val button = findViewById<Button>(buttonId)
+            if (button.text.isBlank()) {
+                val buttonWithNoText = resources.getResourceEntryName(buttonId)
+                buttonWithNoTextId = buttonWithNoText.split("button")[1].toInt()
+                break
+            }
+        }
+    }
+
+
+    @SuppressLint("SetTextI18n")
+    private fun handleButtonClick(buttonId: String) {
+        val buttonNumber = buttonId.split("button")[1].toInt()
+        val emptyButtonId = buttonWithNoTextId
+        val difference = buttonNumber - emptyButtonId!!
+
+        if ((difference == 1 && emptyButtonId % 4 != 0) ||
+            (difference == -1 && buttonNumber % 4 != 0) ||
+            difference == 4 ||
+            difference == -4
+        ) {
+            val emptyButtonR = buttonIds[buttonWithNoTextId!! - 1]
+            val emptyButton = findViewById<Button>(emptyButtonR)
+            val clickedButtonR = buttonIds[buttonNumber - 1]
+            val clickedButton = findViewById<Button>(clickedButtonR)
+
+            turnCount++
+            moveStack.push(Pair(buttonNumber, emptyButtonId))
+            emptyButton.visibility = View.VISIBLE
+            emptyButton.text = clickedButton.text
+            buttonMap[emptyButtonR] = emptyButton.text as String
+            clickedButton.visibility = View.INVISIBLE
+            clickedButton.text = ""
+            buttonMap[clickedButtonR] = clickedButton.text as String
+            buttonWithNoTextId = buttonNumber
+            checkButtonText(emptyButton)
+            checkButtonOrder()
+
+
+
+            turnsMadeTextView.text = "Turns Made: $turnCount"
+        }
 
 
     }
-    private fun buttonResumeService() {
-        connectService()
-        timerService?.resumeTimer()
+
+    private fun setBoard(savedInstanceState: Bundle?) {
+        board = gameBoard()
+
+        val buttonIdsArray = savedInstanceState?.getIntArray("buttonIds")
+        val buttonValuesArray = savedInstanceState?.getStringArray("buttonValues")
+
+        if (buttonIdsArray != null && buttonValuesArray != null) {
+            buttonMap = mutableMapOf<Int, String>().apply {
+                for (i in buttonIdsArray.indices) this[buttonIdsArray[i]] = buttonValuesArray[i]
+            }
+
+            drawBoard(false)
+        } else {
+            buttonMap = mutableMapOf()
+            drawBoard(true)
+        }
+
+        gameActive = savedInstanceState?.getBoolean(gameActiveState) ?: false
+        if (gameActive) {
+            firstStart = false
+            activateBoard(true)
+        }
+
 
     }
+
+
+    @SuppressLint("SetTextI18n")
+    private fun undoMove() {
+        Log.d("movestack", moveStack.toString())
+        if (moveStack.isNotEmpty()) {
+            val (buttonId, originalId) = moveStack.pop()
+            val undoButton = findViewById<Button>(buttonIds[buttonId - 1])
+            val undoEmptyButton = findViewById<Button>(buttonIds[originalId - 1])
+            undoButton.text = undoEmptyButton.text
+            undoButton.visibility = View.VISIBLE
+            undoEmptyButton.text = ""
+            undoEmptyButton.visibility = View.INVISIBLE
+            buttonWithNoTextId = originalId
+
+
+            val turnsMadeTextView = findViewById<TextView>(R.id.TextViewTurnsMade)
+            turnCount--
+            turnsMadeTextView.text = "Turns Made: $turnCount"
+
+        }
+    }
+
+    private fun initView() {
+        setContentView(R.layout.activity_main)
+
+        scrambleButton = findViewById(R.id.scrambleButton)
+        endButton = findViewById(R.id.buttonEnd)
+        testButton = findViewById(R.id.buttontest)
+        undoButton = findViewById(R.id.ButtonUndo)
+        turnsMadeTextView = findViewById(R.id.TextViewTurnsMade)
+        timerTextView = findViewById(R.id.timerTextView)
+        gameBoardLayout = findViewById(R.id.gameBoardLayout)
+
+
+    }
+
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val binder = service as TimerService.LocalBinder
@@ -210,64 +483,68 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun buttonResumeService() {
+        connectService()
+        timerService?.resumeTimer()
+
+    }
+
+    private fun buttonPauseService() {
+        connectService()
+        timerService?.pauseTimer()
+
+
+    }
+
+    private fun restartTimerService() {
+        connectService()
+        timerService?.resetTimer()
+
+
+    }
+
+
+    private fun buttonStartTimerService() {
+        val startServiceIntent = Intent(this, TimerService::class.java)
+        startService(startServiceIntent)
+        connectService()
+        timerService?.resumeTimer()
+    }
 
     private fun connectService() {
         val serviceIntent = Intent(this, TimerService::class.java)
         bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE)
     }
 
-    private fun restartApp(context: Context) {
-        // Stop the timer before restarting the app
-        timerService?.pauseTimer()
 
-        // Restart the app
-        val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
-        intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        context.startActivity(intent)
-    }
-    fun closeApplication(activity: Activity) {
-        // Finish all open activities
-        activity.finishAffinity()
-
-        // Exit the application process
-        Process.killProcess(Process.myPid())
-    }
-
-    private fun undoLastMove() {
-        if (moveStack.isNotEmpty()) {
-            val (button, originalIndex) = moveStack.pop()
-            val emptyButtonIndex = buttonList.indexOfFirst { it.text.toString().isBlank() }
-
-            // Swap the button text and visibility back to the original state
-            val buttonText = button.text
-            button.text = buttonList[originalIndex].text
-            buttonList[originalIndex].text = buttonText
-
-            button.visibility = View.VISIBLE
-            buttonList[originalIndex].visibility = View.INVISIBLE
-            checkButtonText(button)
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
+    private fun timer() {
+        restartTimerService()
+        val sharedPreferences = getSharedPreferences("TimerPrefs", Context.MODE_PRIVATE)
+        val timerValue = sharedPreferences.getInt("timer_value", 0)
 
 
-            turnCount--
-            val turnsMadeTextView = findViewById<TextView>(R.id.TextViewTurnsMade)
-            turnsMadeTextView.text = "Turns made: $turnCount"
-        }
-    }
-    private fun checkButtonColors() {
-        for (button in buttonList) {
-            val buttonId = buttonList.indexOf(button) + 1
-            val buttonText = button.text.toString()
-            if (buttonText.isNotEmpty() && buttonText.toInt() == buttonId) {
-                button.setBackgroundColor(Color.GREEN)
-            } else {
-                button.setBackgroundColor(Color.WHITE)
+        val formattedTime = String.format("%02d:%02d", timerValue / 60, timerValue % 60)
+        timerTextView.text = formattedTime
+        val timerReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                val timerValues = intent?.getIntExtra("timer_value", 0)
+                val formattedTimes = if (timerValues != null) {
+                    String.format("%02d:%02d", timerValues / 60, timerValues % 60)
+                } else {
+                    "00:00"
+                }
+                timerTextView.text = formattedTimes
+
             }
         }
+
+        val timerIntentFilter = IntentFilter("timer_update")
+        registerReceiver(timerReceiver, timerIntentFilter)
     }
 
 
 }
-
 
 
 

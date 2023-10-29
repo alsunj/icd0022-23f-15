@@ -6,13 +6,13 @@ import android.content.Intent
 import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
-import android.util.Log
+import android.os.Looper
 
 
 class TimerService : Service() {
     private var startTimeMillis: Long = 0
     private var elapsedTimeSeconds: Int = 0
-    private val handler = Handler()
+    private val handler = Handler(Looper.getMainLooper())
     var isTimerRunning = false
 
     inner class LocalBinder : Binder() {
@@ -23,7 +23,7 @@ class TimerService : Service() {
 
     private val binder = LocalBinder()
 
-    override fun onBind(intent: Intent?): IBinder? {
+    override fun onBind(intent: Intent?): IBinder {
         return binder
     }
 
@@ -76,8 +76,7 @@ class TimerService : Service() {
         handler.removeCallbacksAndMessages(null)
         super.onDestroy()
     }
-    fun stopAndResetTimer() {
-        isTimerRunning = false
+    fun resetTimer() {
         elapsedTimeSeconds = 0
         startTimeMillis = 0
 

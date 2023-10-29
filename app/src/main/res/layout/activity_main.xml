@@ -2,9 +2,14 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:orientation="horizontal"
+    tools:context=".MainActivity"
+
+    tools:openDrawer="start">
+
 
     <include
         android:id="@+id/include3"
@@ -26,6 +31,7 @@
         app:layout_constraintGuide_percent="0.1" />
 
     <include
+        android:id="@+id/include"
         layout="@layout/top_bar"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -35,7 +41,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <include
-        android:id="@+id/include2"
+        android:id="@+id/gameBoardLayout"
         layout="@layout/game_board"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -50,5 +56,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_begin="332dp" />
+        app:layout_constraintGuide_percent="0.5" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_end="362dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

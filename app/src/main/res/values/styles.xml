@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Text20sp">
+        <item name="android:textSize">14sp</item>
+
+    </style>
+    <style name="TextButton" parent="@style/Text20sp">
+        <item name="android:textColor">#000</item>
+    </style>
+    <style name="ButtonStyleDark">
+        <item name="android:backgroundTint">@drawable/button_dark</item>
+        <item name="android:textColor">@color/DarkModeText</item>
+    </style>
+    <style name="ButtonStyleWhite">
+        <item name="android:backgroundTint">@drawable/button_white</item>
+        <item name="android:textColor">@color/LightModeText</item>
+    </style>
+</resources>

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
     <androidx.constraintlayout.widget.Guideline
@@ -14,12 +15,11 @@
         app:layout_constraintGuide_percent="0.15" />
 
     <include
-        android:id="@+id/firstIncludedLayout"
         layout="@layout/game_control"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/include"
+        app:layout_constraintEnd_toStartOf="@+id/gameBoardLayout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
 
@@ -36,7 +36,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <include
-        android:id="@+id/include"
+        android:id="@+id/gameBoardLayout"
         layout="@layout/game_board"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -50,6 +50,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.5" />
+        app:layout_constraintGuide_percent="0.500684" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

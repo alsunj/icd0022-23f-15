@@ -4,65 +4,47 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#646262">
+    android:background="#646262"
+    >
 
     <Button
         android:id="@+id/scrambleButton"
-        style="@style/TextButton"
+        style="?attr/buttonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+
         android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:backgroundTint="@color/button_white"
         android:text="Start"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/buttonPause"
+        app:layout_constraintEnd_toStartOf="@+id/buttonEnd"
         app:layout_constraintHorizontal_chainStyle="spread_inside"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
+    <ImageButton
         android:id="@+id/buttonEnd"
-        style="@style/TextButton"
+        style="?attr/buttonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginStart="128dp"
         android:layout_marginEnd="10dp"
-        android:layout_marginBottom="10dp"
-        android:backgroundTint="@color/button_white"
-        android:text="X"
+        android:clickable="true"
+        android:focusable="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/ButtonResume"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toEndOf="@+id/scrambleButton"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/hamburger_menudark_24"
+        tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
 
     <Button
-        android:id="@+id/ButtonResume"
-        style="@style/TextButton"
+        android:id="@+id/buttontest"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginBottom="10dp"
-        android:backgroundTint="@color/button_white"
-        android:text="Resume"
+        android:text="Button"
+        style="?attr/buttonStyle"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/buttonEnd"
-        app:layout_constraintStart_toEndOf="@+id/buttonPause"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/buttonPause"
-        style="@style/TextButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:backgroundTint="@color/button_white"
-        android:text="Settings"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/ButtonResume"
         app:layout_constraintStart_toEndOf="@+id/scrambleButton"
         app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

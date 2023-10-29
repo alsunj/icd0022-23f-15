@@ -7,19 +7,20 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme._15"
+        android:theme="@style/LightTheme"
         tools:targetApi="31">
 
         <service android:name=".TimerService"
-            android:enabled="true"/>
+            android:enabled="true"
+            android:exported="false"/>
 
         <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
+                <action android:name="timer_update"/>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />

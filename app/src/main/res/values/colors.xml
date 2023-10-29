@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="lightModeBackGround">#fafafa</color>
+    <color name="lightModeBackGroundBar">#e4e5f1</color>
+    <color name="lightModeButton">#d2d3db</color>
+    <color name="lightModeButtonPressed">#9394a5</color>
+    <color name="lightModeButtonSolved">#484b6a</color>
+    <color name="LightModeText">#000000</color>
+
+    <color name="DarkModeText">#44000D</color>
+    <color name="DarkModeBackGround">#363333</color>
+    <color name="DarkModeBackGroundBar">#222222</color>
+    <color name="DarkModeButton">#252525</color>
+    <color name="DarkModeButtonPressed">#323232</color>
+    <color name="DarkModeButtonSolved">#525252</color>
+
+
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="custom_button_color">#fafafa	</color>
+</resources>
