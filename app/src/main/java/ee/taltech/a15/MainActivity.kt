@@ -78,14 +78,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         themeId = theme()
-
         setTheme(themeId)
         super.onCreate(savedInstanceState)
         initView()
         setBoard(savedInstanceState)
         checkAllButtonColors()
         connectService()
-
         findEmpty()
         buttons()
 
@@ -198,6 +196,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun startButton() {
         scrambleButton.setOnClickListener {
+            checkAllButtonColors()
             if (firstStart) buildGame()
             else resetGame()
         }
@@ -265,7 +264,6 @@ class MainActivity : AppCompatActivity() {
             val buttonIds = buttonIdString.removePrefix("button").toInt()
 
             if (buttonText.isNotEmpty() && buttonText == buttonIds.toString()) {
-
                 val colorResId =
                     if (isDarkTheme) R.color.DarkModeButtonSolved else R.color.lightModeButtonSolved
                 val color = ContextCompat.getColor(this, colorResId)
