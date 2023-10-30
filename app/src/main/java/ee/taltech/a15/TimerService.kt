@@ -1,86 +1,78 @@
 package ee.taltech.a15
 
 import android.app.Service
-import android.content.Context
 import android.content.Intent
-import android.os.Binder
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
-
+import java.util.Timer
+import java.util.TimerTask
 
 class TimerService : Service() {
-    private var startTimeMillis: Long = 0
-    private var elapsedTimeSeconds: Int = 0
-    private val handler = Handler(Looper.getMainLooper())
-    var isTimerRunning = false
+    private lateinit var timerTask: MyTimerTask
+    private lateinit var timer: Timer
+    private var secondsElapsed: Int = 0
+    private var isTimerPaused: Boolean = true
 
-    inner class LocalBinder : Binder() {
-        fun getService(): TimerService {
-            return this@TimerService
-        }
+    companion object {
+        const val timerUpdated = TimerActions.timerUpdated
+        const val ACTION_PAUSE_TIMER = TimerActions.timerPaused
+        const val ACTION_RESUME_TIMER = TimerActions.timerResumed
     }
 
-    private val binder = LocalBinder()
-
-    override fun onBind(intent: Intent?): IBinder {
-        return binder
+    override fun onCreate() {
+        super.onCreate()
+        timer = Timer()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // Record the start time when the service starts if the timer is running
-        isTimerRunning = true
-        if (isTimerRunning) {
-            startTimeMillis = System.currentTimeMillis()
-        }
-
-        // Create a runnable that calculates the elapsed time only if the timer is running
-        val elapsedTimeCalculator = object : Runnable {
-            override fun run() {
-                if (isTimerRunning) {
-                    val currentTimeMillis = System.currentTimeMillis()
-                    elapsedTimeSeconds = ((currentTimeMillis - startTimeMillis) / 1000).toInt()
-                    sendTimerUpdate(elapsedTimeSeconds)
+        if (intent != null) {
+            when (intent.action) {
+                ACTION_PAUSE_TIMER -> {
+                    pauseTimer()
                 }
-                handler.postDelayed(this, 1000) // Update every second
+                ACTION_RESUME_TIMER -> {
+                    resumeTimer()
+                }
+                else -> startTimer()
             }
+        } else {
+            startTimer()
         }
-
-        // Start calculating elapsed time if the timer is running
-        if (isTimerRunning) {
-            handler.postDelayed(elapsedTimeCalculator, 1000)
-        }
-
-        return START_STICKY
+        return START_NOT_STICKY
+    }
+    private fun pauseTimer() {
+        isTimerPaused = true
     }
 
-    fun pauseTimer() {
-        isTimerRunning = false
-
+    private fun resumeTimer() {
+        isTimerPaused = false
     }
 
-    fun resumeTimer() {
-        isTimerRunning = true
-        startTimeMillis = System.currentTimeMillis() - (elapsedTimeSeconds * 1000)
-
-    }
-    private fun sendTimerUpdate(elapsedTimeSeconds: Int) {
-        val intent = Intent("timer_update")
-        intent.putExtra("timer_value", elapsedTimeSeconds)
-        sendBroadcast(intent)
-        val sharedPreferences = getSharedPreferences("TimerPrefs", Context.MODE_PRIVATE)
-        sharedPreferences.edit().putInt("timer_value", elapsedTimeSeconds).apply()
-    }
+    override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
-        handler.removeCallbacksAndMessages(null)
+        super.onDestroy()
+        stopTimer()
+    }
+
+    private fun startTimer() {
+        timerTask = MyTimerTask()
+        timer.scheduleAtFixedRate(timerTask, 0, 1000)
+        isTimerPaused = false // Set isTimerPaused to false when you start the timer
+    }
+
+    private fun stopTimer() {
+        timer.cancel()
         super.onDestroy()
     }
-    fun resetTimer() {
-        elapsedTimeSeconds = 0
-        startTimeMillis = 0
 
+    private inner class MyTimerTask : TimerTask() {
+        override fun run() {
+            if (!isTimerPaused) {
+                secondsElapsed++
+                val intent = Intent(timerUpdated)
+                intent.putExtra(timerUpdated, secondsElapsed)
+                sendBroadcast(intent)
+            }
+        }
     }
-
-
 }

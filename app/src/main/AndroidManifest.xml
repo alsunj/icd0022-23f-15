@@ -15,17 +15,19 @@
         <service android:name=".TimerService"
             android:enabled="true"
             android:exported="false"/>
+        <receiver android:name=".TimerBroadcastReceiver"
+            android:exported="false"/>
 
         <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="timer_update"/>
+                <action android:name="pauseTimer"/>
+                <action android:name="resumeTimer"/>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>
-
 </manifest>
